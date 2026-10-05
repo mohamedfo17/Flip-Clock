@@ -1,3 +1,7 @@
+
+
+
+
 # Minimalist Monochrome Flip Clock & Deep Productivity Desktop App
 
 <p align="center">
@@ -10,7 +14,7 @@ An architectural desktop timepiece and deep productivity workstation built with 
 
 ## Demo
 
-https://github.com/user-attachments/assets/YOUR-VIDEO-ID
+https://github.com/user-attachments/assets/994101f5-2286-4047-9c83-9f493449d39d
 ---
 
 ## Download
