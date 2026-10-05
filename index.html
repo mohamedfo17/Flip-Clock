@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flip Clock & Productivity</title>
+  <link rel="icon" type="image/png" href="./assets/icon-32.png" />
+  <link rel="stylesheet" href="./src/styles/theme.css" />
+  <link rel="stylesheet" href="./src/styles/flip-clock.css" />
+  <link rel="stylesheet" href="./src/styles/app.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Sleek Custom Titlebar -->
+    <header class="titlebar" id="titlebar">
+      <div class="titlebar-brand">
+        <img src="./assets/icon-32.png" width="18" height="18" style="border-radius: 4px; box-shadow: 0 0 6px rgba(0,0,0,0.5);" alt="Flip Clock Logo" />
+        <span>FLIP CLOCK</span>
+      </div>
+
+      <!-- Navigation Modes -->
+      <nav class="nav-modes" id="nav-modes">
+        <button class="nav-mode-btn active" data-mode="clock">Clock</button>
+        <button class="nav-mode-btn" data-mode="pomodoro">Pomodoro</button>
+        <button class="nav-mode-btn" data-mode="countdown">Countdown</button>
+        <button class="nav-mode-btn" data-mode="stopwatch">Stopwatch</button>
+      </nav>
+
+      <!-- Window Action Controls -->
+      <div class="titlebar-controls">
+        <button class="titlebar-btn" id="btn-master-mute" title="Mute All Audio (M)">
+          <svg class="icon-volume-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg class="icon-volume-muted" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <button class="titlebar-btn" id="btn-fullscreen-header" title="Zen Fullscreen (F11)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+        <button class="titlebar-btn" id="btn-mini-mode" title="Mini Floating Widget (W)">
+          <svg class="icon-mini-enter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <rect x="11" y="11" width="8" height="8" rx="1"></rect>
+          </svg>
+          <svg class="icon-mini-exit" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+        <button class="titlebar-btn min-btn" id="btn-minimize" title="Minimize">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button class="titlebar-btn max-btn" id="btn-maximize" title="Maximize">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          </svg>
+        </button>
+        <button class="titlebar-btn close-btn" id="btn-close" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Flip Clock Display Stage -->
+    <main class="main-stage">
+      <!-- Active Pinned Task Header Banner -->
+      <div class="active-task-banner" id="active-task-banner" title="Click to open tasks">
+        <div class="task-indicator-dot"></div>
+        <span class="active-task-title" id="active-task-display">Focus Target: Code Architecture</span>
+        <span class="active-task-badge" id="active-task-pomo-count">🍅 0/4</span>
+      </div>
+
+      <!-- Pomodoro Phase & Cycle Indicator -->
+      <div class="pomo-phase-indicator" id="pomo-phase-indicator" style="display: none;">
+        <span id="pomo-phase-label">FOCUS SESSION</span>
+        <div class="pomo-cycles-dots" id="pomo-cycles-dots">
+          <div class="cycle-dot active"></div>
+          <div class="cycle-dot"></div>
+          <div class="cycle-dot"></div>
+          <div class="cycle-dot"></div>
+        </div>
+      </div>
+
+      <!-- Oversized 3D Split-Flap Clock (Matches Reference Design) -->
+      <div class="flip-clock-container" id="flip-clock">
+        <!-- Hours Unit (2 Cards) -->
+        <div class="flip-unit-group" id="unit-hours">
+          <div class="flip-unit-pair">
+            <div class="flip-card"></div>
+            <div class="flip-card"></div>
+          </div>
+        </div>
+
+        <!-- Clean Subtle Separator Dots -->
+        <div class="flip-separator" id="sep-hm">
+          <div class="flip-dot pulse"></div>
+          <div class="flip-dot pulse"></div>
+        </div>
+
+        <!-- Minutes Unit (2 Cards) + Mini AM/PM Card -->
+        <div class="flip-unit-group" id="unit-minutes">
+          <div class="flip-unit-pair">
+            <div class="flip-card"></div>
+            <div class="flip-card"></div>
+            <!-- Mini AM/PM Split-Flap Card at Top-Right -->
+            <div class="flip-meridiem-card flip-card" id="meridiem-card">
+              <div class="card-face top top-static"><div class="card-face-inner">PM</div></div>
+              <div class="card-face bottom bottom-static"><div class="card-face-inner">PM</div></div>
+              <div class="card-face top top-flip"><div class="card-face-inner">PM</div></div>
+              <div class="card-face bottom bottom-flip"><div class="card-face-inner">PM</div></div>
+              <div class="flip-card-seam"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separator (Seconds) -->
+        <div class="flip-separator seconds-sep hidden" id="sep-ms">
+          <div class="flip-dot pulse"></div>
+          <div class="flip-dot pulse"></div>
+        </div>
+
+        <!-- Optional Seconds Unit (Toggleable in Settings) -->
+        <div class="flip-unit-group seconds-group hidden" id="unit-seconds">
+          <div class="flip-unit-pair">
+            <div class="flip-card"></div>
+            <div class="flip-card"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer Stage Action Controls -->
+      <div class="stage-controls" id="stage-controls" style="display: none;">
+        <button class="btn-secondary-action" id="btn-timer-reset" title="Reset (R)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+        </button>
+
+        <button class="btn-primary-action" id="btn-timer-toggle" title="Start / Pause (Space)">
+          <svg id="icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <svg id="icon-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        </button>
+
+        <button class="btn-secondary-action" id="btn-timer-skip" title="Skip Phase (S)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Productivity Dock Controls -->
+      <footer class="stage-dock">
+        <button class="dock-btn" data-drawer="tasks" id="dock-btn-tasks">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          <span>Tasks</span>
+        </button>
+
+        <button class="dock-btn" data-drawer="audio" id="dock-btn-audio">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+          <span>Soundscape</span>
+        </button>
+
+        <button class="dock-btn" data-drawer="analytics" id="dock-btn-analytics">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Deep Analytics</span>
+        </button>
+
+        <button class="dock-btn" data-drawer="settings" id="dock-btn-settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+
+        <button class="dock-btn" id="dock-btn-pure" title="Pure Clock Mode (Z)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+          <span>Pure Clock</span>
+        </button>
+
+        <button class="dock-btn" id="dock-btn-fullscreen" title="Zen Fullscreen (F11)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+          <span>Zen</span>
+        </button>
+      </footer>
+
+      <!-- Pure Mode Exit Hint Pill -->
+      <div class="pure-mode-exit-hint" id="pure-mode-exit-hint" title="Click to show controls">
+        <span>Double-click or press <strong>ESC</strong> to exit Pure Clock</span>
+      </div>
+    </main>
+
+    <!-- Drawer Backdrop -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+    <!-- Slide-over Drawer Panel -->
+    <aside class="drawer-panel" id="drawer-panel">
+      <header class="drawer-header">
+        <h2 class="drawer-title" id="drawer-title">Tasks & Focus</h2>
+        <button class="drawer-close-btn" id="btn-close-drawer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Drawer Content: Tasks -->
+      <div class="drawer-content drawer-section" id="drawer-tasks">
+        <div class="task-input-row">
+          <input type="text" class="task-input-field" id="new-task-title" placeholder="Add a focus target..." />
+          <input type="number" class="task-est-input" id="new-task-est" min="1" max="12" value="2" title="Estimated Pomodoros" />
+          <button class="task-add-btn" id="btn-add-task">Add</button>
+        </div>
+
+        <div class="tasks-list-container" id="tasks-list">
+          <!-- Dynamic task cards -->
+        </div>
+      </div>
+
+      <!-- Drawer Content: Ambient Soundboard -->
+      <div class="drawer-content drawer-section" id="drawer-audio" style="display: none;">
+        <div class="setting-toggle-row master-mute-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Mute All Audio</span>
+            <span class="setting-toggle-desc">Instant silence for all sounds, ticks, and ambient audio</span>
+          </div>
+          <div class="track-toggle" id="toggle-master-mute">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Mechanical Split-Flap Audio</span>
+            <span class="setting-toggle-desc">Authentic clack sounds on card flips</span>
+          </div>
+          <div class="track-toggle on" id="toggle-flap-audio">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Metronome Ticking</span>
+            <span class="setting-toggle-desc">Subtle second ticks while timer runs</span>
+          </div>
+          <div class="track-toggle" id="toggle-tick-audio">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="settings-group-title">Ambient Soundscapes</div>
+
+        <div class="ambient-track-item">
+          <div class="ambient-track-header">
+            <span class="ambient-track-name">🌧️ Gentle Rain</span>
+            <div class="track-toggle" data-ambient="rain">
+              <div class="track-toggle-handle"></div>
+            </div>
+          </div>
+          <input type="range" class="track-slider" data-ambient-slider="rain" min="0" max="1" step="0.05" value="0.4" />
+        </div>
+
+        <div class="ambient-track-item">
+          <div class="ambient-track-header">
+            <span class="ambient-track-name">🌊 Ocean Waves</span>
+            <div class="track-toggle" data-ambient="waves">
+              <div class="track-toggle-handle"></div>
+            </div>
+          </div>
+          <input type="range" class="track-slider" data-ambient-slider="waves" min="0" max="1" step="0.05" value="0.4" />
+        </div>
+
+        <div class="ambient-track-item">
+          <div class="ambient-track-header">
+            <span class="ambient-track-name">🪵 Campfire Hearth</span>
+            <div class="track-toggle" data-ambient="campfire">
+              <div class="track-toggle-handle"></div>
+            </div>
+          </div>
+          <input type="range" class="track-slider" data-ambient-slider="campfire" min="0" max="1" step="0.05" value="0.35" />
+        </div>
+
+        <div class="ambient-track-item">
+          <div class="ambient-track-header">
+            <span class="ambient-track-name">🌌 Deep Brown Noise</span>
+            <div class="track-toggle" data-ambient="brownnoise">
+              <div class="track-toggle-handle"></div>
+            </div>
+          </div>
+          <input type="range" class="track-slider" data-ambient-slider="brownnoise" min="0" max="1" step="0.05" value="0.4" />
+        </div>
+
+        <div class="ambient-track-item">
+          <div class="ambient-track-header">
+            <span class="ambient-track-name">💨 Calming White Noise</span>
+            <div class="track-toggle" data-ambient="whitenoise">
+              <div class="track-toggle-handle"></div>
+            </div>
+          </div>
+          <input type="range" class="track-slider" data-ambient-slider="whitenoise" min="0" max="1" step="0.05" value="0.3" />
+        </div>
+      </div>
+
+      <!-- Drawer Content: Deep Analytics Suite -->
+      <div class="drawer-content drawer-section" id="drawer-analytics" style="display: none;">
+        <!-- Daily Goal Progress Banner -->
+        <div class="analytics-goal-card">
+          <div class="goal-header">
+            <span class="goal-title">Daily Focus Goal</span>
+            <span class="goal-numbers" id="goal-progress-text">0m / 120m</span>
+          </div>
+          <div class="goal-bar-track">
+            <div class="goal-bar-fill" id="goal-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 4-Box Key Metrics Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-val" id="stat-focus-time">0m</span>
+            <span class="stat-label">Focus Today</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="stat-pomo-count">0</span>
+            <span class="stat-label">Completed Pomos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="stat-streak">1 🔥</span>
+            <span class="stat-label">Daily Streak</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="stat-all-time">0h</span>
+            <span class="stat-label">All-Time Focus</span>
+          </div>
+        </div>
+
+        <!-- 28-Day GitHub-style Heatmap -->
+        <div class="analytics-panel-section">
+          <div class="section-title-row">
+            <span class="section-heading">Productivity Heatmap (28 Days)</span>
+            <div class="heatmap-legend">
+              <span>Less</span>
+              <span class="legend-cell lvl-0"></span>
+              <span class="legend-cell lvl-1"></span>
+              <span class="legend-cell lvl-2"></span>
+              <span class="legend-cell lvl-3"></span>
+              <span class="legend-cell lvl-4"></span>
+              <span>More</span>
+            </div>
+          </div>
+          <div class="heatmap-grid" id="heatmap-grid">
+            <!-- 28 interactive heatmap cells -->
+          </div>
+        </div>
+
+        <!-- 7-Day Bar Chart -->
+        <div class="chart-section">
+          <span class="chart-header">Past 7 Days Activity</span>
+          <div class="chart-bars-wrap" id="analytics-chart-bars">
+            <!-- Dynamic 7-day bars -->
+          </div>
+        </div>
+
+        <!-- Hourly Focus Pattern (Time of Day Breakdown) -->
+        <div class="analytics-panel-section">
+          <div class="section-title-row">
+            <span class="section-heading">Focus by Time of Day</span>
+            <span class="section-subheading" id="peak-hour-badge">Peak: Afternoon</span>
+          </div>
+          <div class="time-of-day-list" id="time-of-day-list">
+            <!-- Morning, Afternoon, Evening, Night Owl bars -->
+          </div>
+        </div>
+
+        <!-- Focus Time by Task Distribution -->
+        <div class="analytics-panel-section">
+          <div class="section-title-row">
+            <span class="section-heading">Focus Time by Task</span>
+          </div>
+          <div class="task-allocation-list" id="task-allocation-list">
+            <!-- Dynamic task distribution rows -->
+          </div>
+        </div>
+
+        <!-- Session History Timeline Log -->
+        <div class="analytics-panel-section">
+          <div class="section-title-row">
+            <span class="section-heading">Recent Session Log</span>
+          </div>
+          <div class="session-history-list" id="session-history-list">
+            <!-- Chronological session entries -->
+          </div>
+        </div>
+
+        <!-- Data Tools & Sample Data -->
+        <div class="analytics-actions-section">
+          <button class="btn-analytics-tool" id="btn-load-sample-analytics">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+            <span>Populate Demo Analytics</span>
+          </button>
+          <button class="btn-analytics-tool" id="btn-export-csv">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+            </svg>
+            <span>Export CSV</span>
+          </button>
+          <button class="btn-analytics-tool" id="btn-export-json">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+            </svg>
+            <span>Export JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Drawer Content: Settings -->
+      <div class="drawer-content drawer-section" id="drawer-settings" style="display: none;">
+        <div class="settings-group">
+          <span class="settings-group-title">Pomodoro Presets</span>
+          <div class="preset-pills-row">
+            <button class="preset-pill active" data-focus="25" data-break="5">25 / 5</button>
+            <button class="preset-pill" data-focus="50" data-break="10">50 / 10</button>
+            <button class="preset-pill" data-focus="90" data-break="20">90 / 20</button>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Blank Leading Zero on Hours</span>
+            <span class="setting-toggle-desc">Show blank card for 1-9 instead of "09"</span>
+          </div>
+          <div class="track-toggle on" id="toggle-blank-leading-zero">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">24-Hour Military Format</span>
+            <span class="setting-toggle-desc">Toggle between 12-hour and 24-hour display</span>
+          </div>
+          <div class="track-toggle" id="toggle-24h-clock">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Show Seconds Cards</span>
+            <span class="setting-toggle-desc">Display seconds pair alongside minutes</span>
+          </div>
+          <div class="track-toggle" id="toggle-show-seconds">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Auto-start Breaks</span>
+            <span class="setting-toggle-desc">Automatically transition to break after focus</span>
+          </div>
+          <div class="track-toggle on" id="toggle-autostart-breaks">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <div class="setting-toggle-info">
+            <span class="setting-toggle-title">Posture & Eye Rest Prompts</span>
+            <span class="setting-toggle-desc">Show wellness tips during break intervals</span>
+          </div>
+          <div class="track-toggle on" id="toggle-break-prompts">
+            <div class="track-toggle-handle"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Micro-Break Posture & Stretch Modal -->
+    <div class="break-overlay" id="break-overlay">
+      <div class="break-modal-card">
+        <div class="break-icon-wrap">👀</div>
+        <h3 class="break-modal-title">Time to Rest Your Eyes</h3>
+        <p class="break-modal-desc">Look 20 feet away for 20 seconds to prevent digital fatigue.</p>
+        <div class="break-actions-row">
+          <button class="break-primary-btn" id="btn-break-done">Done! Feeling Refreshed</button>
+          <button class="break-skip-btn" id="btn-break-skip">Skip</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

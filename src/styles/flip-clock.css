@@ -1,0 +1,390 @@
+/* 3D Mechanical Split-Flap Clock Styling - Oversized Architectural Aesthetic */
+
+:root {
+  --fc-card-width: clamp(110px, 11.2vw, 160px);
+  --fc-card-height: clamp(180px, 18.5vw, 265px);
+  --fc-font-size: clamp(155px, 16vw, 230px);
+  --fc-radius: 12px;
+  --fc-gap: clamp(8px, 0.9vw, 14px);
+  --fc-unit-gap: clamp(14px, 1.6vw, 26px);
+
+  /* Mini AM/PM flap dimensions */
+  --fc-pm-width: clamp(52px, 5.4vw, 76px);
+  --fc-pm-height: clamp(58px, 6vw, 86px);
+  --fc-pm-font: clamp(30px, 3.2vw, 44px);
+}
+
+.flip-clock-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fc-unit-gap);
+  perspective: 1400px;
+  position: relative;
+  padding: 30px 48px;
+  margin: auto;
+  max-width: 980px;
+}
+
+/* Clock Unit Group */
+.flip-unit-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.flip-unit-pair {
+  display: flex;
+  gap: var(--fc-gap);
+  position: relative;
+}
+
+/* Clean, unobtrusive label */
+.flip-unit-label {
+  display: none; /* Hidden by default to match clean reference image */
+}
+
+/* Individual Oversized Flip Card */
+.flip-card {
+  position: relative;
+  width: var(--fc-card-width);
+  height: var(--fc-card-height);
+  background-color: #121214;
+  border-radius: var(--fc-radius);
+  box-shadow: 
+    0 24px 50px -10px rgba(0, 0, 0, 0.85),
+    0 10px 20px -5px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+  font-family: var(--font-clock);
+  font-size: var(--fc-font-size);
+  line-height: var(--fc-card-height);
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  perspective: 800px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Side axle notches / mechanical hinge cuts */
+.flip-card::before,
+.flip-card::after {
+  content: '';
+  position: absolute;
+  top: calc(50% - 6px);
+  width: 5px;
+  height: 12px;
+  background-color: var(--bg-main);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 12;
+  border-radius: 3px;
+}
+.flip-card::before {
+  left: -3px;
+  border-left: none;
+}
+.flip-card::after {
+  right: -3px;
+  border-right: none;
+}
+
+/* Horizontal center seam line */
+.flip-card-seam {
+  position: absolute;
+  top: calc(50% - 1.5px);
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #060608;
+  box-shadow: 
+    0 -1px 0 rgba(0, 0, 0, 0.95),
+    0 1.5px 0 rgba(255, 255, 255, 0.07);
+  z-index: 10;
+}
+
+/* Card half slices */
+.card-face {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-face-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: var(--fc-card-height);
+  line-height: var(--fc-card-height);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  transform: translateY(0);
+}
+
+/* Top Half Face */
+.card-face.top {
+  top: 0;
+  border-top-left-radius: var(--fc-radius);
+  border-top-right-radius: var(--fc-radius);
+  background: linear-gradient(180deg, #2a2a2e 0%, #1e1e21 95%, #18181b 100%);
+  transform-origin: bottom center;
+}
+.card-face.top .card-face-inner {
+  top: 0;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Bottom Half Face (Subtly shaded text for realistic depth) */
+.card-face.bottom {
+  bottom: 0;
+  border-bottom-left-radius: var(--fc-radius);
+  border-bottom-right-radius: var(--fc-radius);
+  background: linear-gradient(180deg, #161618 0%, #111113 70%, #0c0c0e 100%);
+  transform-origin: top center;
+}
+.card-face.bottom .card-face-inner {
+  top: calc(var(--fc-card-height) * -0.5);
+  color: #e4e4e7;
+  filter: brightness(0.82) contrast(1.05);
+}
+
+/* Subtle highlights & card plate bevels */
+.card-face.top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+.card-face.bottom::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 40%);
+  pointer-events: none;
+}
+
+/* 3D Animation Flaps */
+.card-face.top-flip {
+  z-index: 6;
+  transform-origin: bottom center;
+}
+.card-face.bottom-flip {
+  z-index: 5;
+  transform-origin: top center;
+  transform: rotateX(90deg);
+}
+
+/* Flipping Animation Keyframes */
+.flip-card.flipping .card-face.top-flip {
+  animation: flipTopCard 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.flip-card.flipping .card-face.bottom-flip {
+  animation: flipBottomCard 0.28s 0.14s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes flipTopCard {
+  0% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+  100% {
+    transform: rotateX(-90deg);
+    filter: brightness(0.35);
+  }
+}
+
+@keyframes flipBottomCard {
+  0% {
+    transform: rotateX(90deg);
+    filter: brightness(1.7);
+  }
+  100% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+}
+
+/* --- Mini AM/PM Split-Flap Card (Matches Reference Image) --- */
+.flip-meridiem-card {
+  position: absolute;
+  top: 0;
+  right: calc(var(--fc-pm-width) * -1 - var(--fc-gap));
+  width: var(--fc-pm-width);
+  height: var(--fc-pm-height);
+  background-color: #121214;
+  border-radius: 8px;
+  box-shadow: 
+    0 16px 32px -6px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-family: var(--font-clock);
+  font-size: var(--fc-pm-font);
+  line-height: var(--fc-pm-height);
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  perspective: 500px;
+  user-select: none;
+  z-index: 20;
+}
+
+.flip-meridiem-card .card-face-inner {
+  height: var(--fc-pm-height);
+  line-height: var(--fc-pm-height);
+  letter-spacing: 0.02em;
+}
+
+.flip-meridiem-card .card-face.bottom .card-face-inner {
+  top: calc(var(--fc-pm-height) * -0.5);
+  filter: brightness(0.82);
+}
+
+.flip-meridiem-card .flip-card-seam {
+  top: calc(50% - 1px);
+  height: 2px;
+}
+
+/* Subtle separator between hours and minutes */
+.flip-separator {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0 4px;
+  align-self: center;
+}
+
+.flip-dot {
+  width: clamp(8px, 0.9vw, 14px);
+  height: clamp(8px, 0.9vw, 14px);
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+}
+
+.flip-dot.pulse {
+  animation: dotPulse 1s infinite alternate;
+}
+
+@keyframes dotPulse {
+  0% { opacity: 0.2; }
+  100% { opacity: 0.95; }
+}
+
+/* Seconds toggle hidden / visible */
+.flip-unit-group.seconds-group.hidden {
+  display: none !important;
+}
+.flip-separator.seconds-sep.hidden {
+  display: none !important;
+}
+
+/* When seconds are toggled on, scale cards so all 6 cards maintain generous margins and paddings */
+body.has-seconds {
+  --fc-card-width: clamp(78px, 8vw, 115px);
+  --fc-card-height: clamp(128px, 13vw, 190px);
+  --fc-font-size: clamp(108px, 11.2vw, 160px);
+  --fc-pm-width: clamp(38px, 4vw, 56px);
+  --fc-pm-height: clamp(44px, 4.5vw, 64px);
+  --fc-pm-font: clamp(22px, 2.3vw, 32px);
+}
+
+/* Secondary seconds card styling */
+.flip-unit-group.seconds-group .flip-card {
+  width: var(--fc-card-width);
+  height: var(--fc-card-height);
+  font-size: var(--fc-font-size);
+  line-height: var(--fc-card-height);
+  align-self: center;
+}
+.flip-unit-group.seconds-group .card-face-inner {
+  height: var(--fc-card-height);
+  line-height: var(--fc-card-height);
+}
+.flip-unit-group.seconds-group .card-face.bottom .card-face-inner {
+  top: calc(var(--fc-card-height) * -0.5);
+}
+
+/* --- Viewport & Fullscreen Scaling --- */
+
+/* Fullscreen Zen Mode: Balanced, elegant, and perfectly margined */
+body.mode-fullscreen {
+  --fc-card-width: clamp(140px, 15vw, 220px);
+  --fc-card-height: clamp(230px, 24vw, 360px);
+  --fc-font-size: clamp(200px, 22vw, 320px);
+  --fc-radius: 14px;
+  --fc-gap: clamp(10px, 1.2vw, 18px);
+  --fc-unit-gap: clamp(16px, 1.8vw, 30px);
+
+  --fc-pm-width: clamp(66px, 7vw, 102px);
+  --fc-pm-height: clamp(74px, 8vw, 118px);
+  --fc-pm-font: clamp(40px, 4.2vw, 62px);
+}
+
+/* Mini Floating Widget Mode */
+body.mode-mini {
+  --fc-card-width: 48px;
+  --fc-card-height: 70px;
+  --fc-font-size: 52px;
+  --fc-radius: 6px;
+  --fc-gap: 4px;
+  --fc-unit-gap: 8px;
+
+  --fc-pm-width: 26px;
+  --fc-pm-height: 30px;
+  --fc-pm-font: 16px;
+}
+
+body.mode-mini .flip-clock-container {
+  padding: 0;
+  padding-right: 32px; /* Offsets absolute AM/PM card to keep 4 clock digits centered */
+}
+
+body.mode-mini .flip-dot {
+  width: 4px;
+  height: 4px;
+  gap: 12px;
+}
+
+body.mode-mini .flip-separator {
+  gap: 12px;
+  padding: 0 2px;
+}
+
+body.mode-mini .flip-card::before,
+body.mode-mini .flip-card::after {
+  width: 3px;
+  height: 8px;
+  top: calc(50% - 4px);
+}
+
+body.mode-mini .flip-card-seam {
+  height: 2px;
+  top: calc(50% - 1px);
+}
+
+/* Mini mode when seconds are enabled */
+body.mode-mini.has-seconds {
+  --fc-card-width: 38px;
+  --fc-card-height: 56px;
+  --fc-font-size: 42px;
+  --fc-gap: 3px;
+  --fc-unit-gap: 6px;
+  --fc-pm-width: 22px;
+  --fc-pm-height: 26px;
+  --fc-pm-font: 13px;
+}
+body.mode-mini.has-seconds .flip-clock-container {
+  padding-right: 26px;
+}
